@@ -3,6 +3,13 @@ import time
 import hashlib
 import os
 import random
+
+if os.path.exists(".env"):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        print("Le module python-dotenv n'est pas installé, mais .env détecté.")
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -98,7 +105,6 @@ def main():
             save_hash(current_hash)
             send_notification("Initialisation des notes, aucun changement détecté.")
             continue
-            
         if last_hash != current_hash:
             print("❗ Changement détecté dans les notes !")
             send_notification("❗Changement détecté dans les notes !")
