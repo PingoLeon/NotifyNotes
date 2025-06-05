@@ -10,9 +10,7 @@ if os.path.exists(".env"):
         load_dotenv()
     except ImportError:
         print("Le module python-dotenv n'est pas installé, mais .env détecté.")
-from dotenv import load_dotenv
 
-load_dotenv()
 STORAGE_FILE = os.getenv("STORAGE_FILE", "last_notes_hash.txt")
 STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "ntfy_url.txt")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "7200"))
