@@ -21,3 +21,4 @@ USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 CMD ["python", "src/notes.py"]
+LABEL org.opencontainers.image.source=https://github.com/PingoLeon/NotifyNotes
