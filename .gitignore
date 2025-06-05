@@ -18,6 +18,7 @@ ENV/
 
 # Fichiers de hash ou de cache
 last_notes_hash.txt
+ntfy_url.txt
 
 # Docker
 *.pid
