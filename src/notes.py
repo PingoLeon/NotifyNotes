@@ -2,7 +2,7 @@ import requests
 import time
 import hashlib
 import os
-from random import choices
+import random
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,7 +50,7 @@ else:
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 if LOG_LEVEL == "DEBUG": # Adapter l'intervalle de vérification en fonction du niveau de log
-    CHECK_INTERVAL = 120 
+    CHECK_INTERVAL = 30
 
 def get_notes_content():
     response = requests.get(URL)
@@ -90,7 +90,9 @@ def main():
         content = get_notes_content()
         current_hash = get_content_hash(content)
         last_hash = load_last_hash()
-        print(f"Vérification des notes...")
+        #jour et heure
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        print(f"Vérification des notes à {current_time}...")
         if last_hash is None:
             print("Aucun hash précédent trouvé, enregistrement du hash actuel.")
             save_hash(current_hash)
@@ -98,13 +100,13 @@ def main():
             continue
             
         if last_hash != current_hash:
-            print("Changement détecté dans les notes.")
-            send_notification("Changement détecté dans les notes !")
+            print("❗ Changement détecté dans les notes !")
+            send_notification("❗Changement détecté dans les notes !")
             save_hash(current_hash)
         else:
             if LOG_LEVEL == "DEBUG" :
-                print("Aucun changement détecté.")
-                send_notification("Aucun changement détecté.")
+                print("🫠 Aucun changement détecté.")
+                send_notification("🫠 Aucun changement détecté.")
         time.sleep(CHECK_INTERVAL)
 
 if __name__ == "__main__":
