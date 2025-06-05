@@ -1,11 +1,11 @@
 # NotifyNotes
 
-Simple script Python à self-host soi-même via Docker pour vérifier régulièrement si des nouvelles notes sont disponibles. Envoie une notification à une instance ntfy à préciser.
+Simple script Python à self-host soi-même via Docker pour vérifier régulièrement si des nouvelles notes sont disponibles. Envoie une notification à une instance ntfy
 
 ## Structure du projet
 
 ```
-notes-monitor
+NotifyNotes
 ├── src
 │   └── notes.py        # Script Python pour surveiller les notes
 ├── requirements.txt     # Dépendances nécessaires
@@ -16,39 +16,85 @@ notes-monitor
 ## Prérequis
 
 - Docker installé sur votre host
-- Une instance self-host de ntfy de préférence, sinon ntfy.sh est utilisé avec une URL fournie dans les logs
-- 
+- l'app ntfy installée (IOS/Android)
+
+## Utilisation
+
+- Renseigner les variables d'env (voir section après) pour que l'application fonctionne correctement
+- Si pas d'instance NTFY self-hostée, une URL est donnée dans les logs docker et est à renseigner sur l'app ntfy
 
 ## Installation
 
 1. Clonez ce dépôt sur votre machine :
 
    ```
-   git clone <URL_DU_DEPOT>
-   cd notes-monitor
-   ```
-2. Construisez l'image Docker :
+   git clone https://github.com/PingoLeon/NotifyNotes
 
    ```
-   docker build -t notes-monitor .
+2. Build l'image Docker :
+
+   ```
+   docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/notifynotes:latest .
    ```
 
-## Exécution
+## Variables d'environnement
 
-Pour exécuter le script dans un conteneur Docker, utilisez la commande suivante :
+| Variable         | Description                                                    | Par défaut / Exemple                                              | Obligatoire |
+| ---------------- | -------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
+| URL              | **REQUIS : URL de la page à surveiller pour les notes** | https://campusonline.inseec.net/note/note_ajax.php?AccountName=... | Oui         |
+| NTFY_URL         | URL du serveur ntfy pour envoyer les notifications             | https://ntfy.xxxxxxx.com/notifs                                    | Non         |
+| NTFY_AUTH        | Active l'authentification ntfy (true/false)                    | false                                                              | Non         |
+| NTFY_USER        | Nom d'utilisateur pour l'authentification ntfy                 | superbanane123                                                     | Non         |
+| NTFY_PASS        | Mot de passe pour l'authentification ntfy                      | supermdp1234indevinable                                            | Non         |
+| CHECK_INTER      | Intervalle de vérification en secondes                        | 3600 (en secondes)                                                 | Non         |
+| STORAGE_FILE     | Chemin du fichier de stockage du hash des notes                | /config/last_notes_hash.txt                                        | Non         |
+| STORAGE_FILE_URL | Chemin du fichier de stockage de l'URL ntfy                    | /config/ntfy_url.txt                                               | Non         |
 
+## Utilisation avec Docker Compose
+
+Voici un exemple de fichier `docker-compose.yml` :
+
+```yaml
+# filepath: c:\Users\leon\Downloads\testpy\NotifyNotes\docker-compose.yml
+version: '3.8'
+services:
+  notifynotes:
+    image: ghcr.io/pingoleon/notifynotes:latest
+    container_name: notifynotes
+    environment:
+      - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=[redacted]
+      - NTFY_URL=[redacted] #Facultatif
+      - NTFY_AUTH=[redacted] 
+      - NTFY_USER=[redacted]
+      - NTFY_PASS=[redacted]
+    volumes:
+      - /config/notifynotes:/config
+    restart: unless-stopped
+    network_mode: host
 ```
-docker run -e WEBHOOK_URL=<URL_DU_WEBHOOK> notes-monitor
+
+Ou en ligne de commande Docker :
+
+```bash
+docker run -d \
+  --name notifynotes \
+  --env URL="https://campusonline.inseec.net/note/note_ajax.php?AccountName=[redacted]" \
+  --env NTFY_URL=[redacted] \
+  --env NTFY_AUTH=[redacted] \
+  --env NTFY_USER=[redacted] \
+  --env NTFY_PASS=[redacted] \
+  --volume /config/notifynotes:/config \
+  --restart unless-stopped \
+  --network host \
+  ghcr.io/pingoleon/notifynotes:latest
 ```
 
-Remplacez `<URL_DU_WEBHOOK>` par l'URL de votre webhook.
+Vous pouvez aussi lancer le conteneur avec la commande :
 
-## Fonctionnalités
-
-- Surveillance des notes avec détection de changements.
-- Envoi de notifications via un webhook lorsque des changements sont détectés.
-- Exécution périodique configurable.
+```bash
+docker compose up -d
+```
 
 ## Contribuer
 
-Les contributions sont les bienvenues ! Veuillez soumettre une demande de tirage pour toute amélioration ou correction.
+Les contributions sont les bienvenues ! Une pull request ça fait toujours plaisir

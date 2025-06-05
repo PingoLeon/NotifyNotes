@@ -4,6 +4,7 @@ import hashlib
 import os
 import random
 
+#* Activer ou non le dotenv si le fichier .env est présent
 if os.path.exists(".env"):
     try:
         from dotenv import load_dotenv
@@ -11,20 +12,23 @@ if os.path.exists(".env"):
     except ImportError:
         print("Le module python-dotenv n'est pas installé, mais .env détecté.")
 
-STORAGE_FILE = os.getenv("STORAGE_FILE", "last_notes_hash.txt")
-STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "ntfy_url.txt")
+#* Variables d'environnement
+STORAGE_FILE = os.getenv("STORAGE_FILE", "/config/last_notes_hash.txt")
+STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "/config/ntfy_url.txt")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "7200"))
 
-# Charger les variables d'environnement
-URL = os.getenv("URL")
+#! Chargement des variables d'environnement importantes
+#? URL des notes à surveiller
+URL = os.getenv("URL") 
 if not URL:
     print("Erreur: La variable URL doit être définie dans le fichier .env ou en ENV docker. (ex:https://campusonline.inseec.net/note/note_ajax.php?AccountName=)")
     exit(1)
 elif not URL.startswith("https://campusonline.inseec.net/note/note_ajax.php?AccountName="):
     print("Erreur: L'URL doit commencer par 'https://campusonline.inseec.net/note/note_ajax.php?AccountName='")
     exit(1)
-    
-NTFY_AUTH = os.getenv("NTFY_AUTH", "False").lower() == "true"
+
+#? Vérification de l'authentification
+NTFY_AUTH = os.getenv("NTFY_AUTH", "False").lower() == "true" 
 if NTFY_AUTH:
     NTFY_USER = os.getenv("NTFY_USER")
     NTFY_PASS = os.getenv("NTFY_PASS")
@@ -33,8 +37,8 @@ if NTFY_AUTH:
         print("Erreur: Les variables d'environnement NTFY_USER et NTFY_PASS doivent être définies si NTFY_AUTH est activé.")
         exit(1)
 
-# Gestion intelligente de l'URL NTFY
-NTFY_URL = os.getenv("NTFY_URL")
+#? Endpoint de notification NTFY
+NTFY_URL = os.getenv("NTFY_URL") 
 if NTFY_URL:
     print("URL ntfy custom utilisée :", NTFY_URL)
 else:
@@ -53,10 +57,12 @@ else:
         print("URL ntfy par défaut générée :", NTFY_URL)
         NTFY_AUTH = False
 
+#? Niveau de log
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 if LOG_LEVEL == "DEBUG": # Adapter l'intervalle de vérification en fonction du niveau de log
     CHECK_INTERVAL = 30
 
+#? Fonction pour récupérer le contenu des notes
 def get_notes_content():
     response = requests.get(URL)
     
@@ -65,6 +71,7 @@ def get_notes_content():
     response.raise_for_status()
     return response.text
 
+#? Fonction pour calculer le hash du contenu des notes (et check si le hash est correct)
 def get_content_hash(content):
     hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
     if hash == "9c287ec0f172e07215c5af2f96445968c266bcc24519ee0cf70f43f178fa613e":
@@ -72,16 +79,19 @@ def get_content_hash(content):
         exit(1)     
     return hash
 
+#? Chargement du dernier hash depuis un fichier
 def load_last_hash():
     if not os.path.exists(STORAGE_FILE):
         return None
     with open(STORAGE_FILE, "r") as f:
         return f.read().strip()
 
+#? Sauvegarde du hash dans un fichier
 def save_hash(hash_value):
     with open(STORAGE_FILE, "w") as f:
         f.write(hash_value)
 
+#! Envoi de notification via NTFY (Amélioration possible)
 def send_notification(msg):
     if NTFY_AUTH:
         response = requests.post(NTFY_URL, data=msg, auth=auth)
@@ -92,25 +102,33 @@ def send_notification(msg):
 
 def main():
     while True:
+        # Récupérer le contenu des notes et calculer le hash
         content = get_notes_content()
         current_hash = get_content_hash(content)
         last_hash = load_last_hash()
-        #jour et heure
+        
+        # Afficher l'heure actuelle et vérifier les changements
         current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"Vérification des notes à {current_time}...")
+        
+        # Vérifier si le hash précédent existe
         if last_hash is None:
             print("Aucun hash précédent trouvé, enregistrement du hash actuel.")
             save_hash(current_hash)
             send_notification("Initialisation des notes, aucun changement détecté.")
             continue
+        
+        # Comparaison des hash
         if last_hash != current_hash:
-            print("❗ Changement détecté dans les notes !")
+            print("\n#####❗ Changement détecté dans les notes !####")
             send_notification("❗Changement détecté dans les notes !")
             save_hash(current_hash)
         else:
+            print("\n🫠 Aucun changement détecté.")
             if LOG_LEVEL == "DEBUG" :
-                print("\n🫠 Aucun changement détecté.")
-                send_notification("🫠 Aucun changement détecté.")
+                send_notification("🫠 Aucun changement détecté.") # Envoyer une notif si le debug est activé
+        
+        # Afficher le prochain check et attendre
         next_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + CHECK_INTERVAL))
         print("Prochain check à", next_time)
         time.sleep(CHECK_INTERVAL)
