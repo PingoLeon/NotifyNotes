@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+ENV/
+.Python
+
+# VS Code
+.vscode/
+
+# Fichiers de logs
+*.log
+
+# Fichiers de hash ou de cache
+last_notes_hash.txt
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# Images, volumes, etc.
+*.tar
+*.img
+
+# Environnements et secrets
+.env
+.env.*
+
+# Dossiers temporaires
+tmp/
+temp/
+.cache/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Autres fichiers à ignorer
+*.bak
+
+# Docker build
+docker-compose.debug.yml
