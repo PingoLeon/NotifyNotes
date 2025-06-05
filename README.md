@@ -1,6 +1,6 @@
-# Notes Monitor
+# NotifyNotes
 
-Ce projet est un script Python qui surveille les notes sur une plateforme en ligne. Lorsqu'un changement est détecté dans le contenu des notes, une notification est envoyée via un webhook.
+Simple script Python à self-host soi-même via Docker pour vérifier régulièrement si des nouvelles notes sont disponibles. Envoie une notification à une instance ntfy à préciser.
 
 ## Structure du projet
 
@@ -15,8 +15,9 @@ notes-monitor
 
 ## Prérequis
 
-- Docker installé sur votre machine.
-- Un webhook configuré pour recevoir les notifications.
+- Docker installé sur votre host
+- Une instance self-host de ntfy de préférence, sinon ntfy.sh est utilisé avec une URL fournie dans les logs
+- 
 
 ## Installation
 
@@ -26,7 +27,6 @@ notes-monitor
    git clone <URL_DU_DEPOT>
    cd notes-monitor
    ```
-
 2. Construisez l'image Docker :
 
    ```
