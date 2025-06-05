@@ -21,7 +21,7 @@ NotifyNotes
 ## Utilisation
 
 - Renseigner les variables d'env (voir section après) pour que l'application fonctionne correctement
-- Si pas d'instance NTFY self-hostée, une URL est donnée dans les logs docker et est à renseigner sur l'app ntfy
+- Si pas d'instance NTFY self-hostée, une URL est donnée dans les logs docker et stockée dans un fichier dans /config/ et est à renseigner sur l'app ntfy
 
 ## Installation
 
@@ -49,6 +49,8 @@ NotifyNotes
 | CHECK_INTER      | Intervalle de vérification en secondes                        | 3600 (en secondes)                                                 | Non         |
 | STORAGE_FILE     | Chemin du fichier de stockage du hash des notes                | /config/last_notes_hash.txt                                        | Non         |
 | STORAGE_FILE_URL | Chemin du fichier de stockage de l'URL ntfy                    | /config/ntfy_url.txt                                               | Non         |
+
+**Si aucune instance self-host n'est disponible, ça ne sert à rien de mettre les variables facultatives**
 
 ## Utilisation avec Docker Compose
 
