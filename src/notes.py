@@ -109,8 +109,10 @@ def main():
             save_hash(current_hash)
         else:
             if LOG_LEVEL == "DEBUG" :
-                print("🫠 Aucun changement détecté.")
+                print("\n🫠 Aucun changement détecté.")
                 send_notification("🫠 Aucun changement détecté.")
+        next_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + CHECK_INTERVAL))
+        print("Prochain check à", next_time)
         time.sleep(CHECK_INTERVAL)
 
 if __name__ == "__main__":
