@@ -33,4 +33,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/pingoleon/notifynotes:latest
+          tags: |
+            ghcr.io/pingoleon/notifynotes:latest
+            ghcr.io/pingoleon/notifynotes:amd64
+            ghcr.io/pingoleon/notifynotes:arm64
