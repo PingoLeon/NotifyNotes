@@ -1,6 +1,0 @@
-services:
-  notesmonitor:
-    image: notesmonitor
-    build:
-      context: .
-      dockerfile: ./Dockerfile
