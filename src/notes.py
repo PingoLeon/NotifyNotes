@@ -17,6 +17,15 @@ STORAGE_FILE = os.getenv("STORAGE_FILE", "/config/last_notes_hash.txt")
 STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "/config/ntfy_url.txt")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "7200"))
 
+#* Ajout de la gestion du timezone
+TZ = os.getenv("TZ", "Europe/Paris")
+os.environ["TZ"] = TZ
+try:
+    time.tzset()
+except AttributeError:
+    print("Avertissement : time.tzset() non supporté sur cette plateforme.")
+
+
 #! Chargement des variables d'environnement importantes
 #? URL des notes à surveiller
 URL = os.getenv("URL") 
