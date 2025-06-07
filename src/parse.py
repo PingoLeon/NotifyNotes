@@ -60,7 +60,7 @@ while i < len(split_data[0]):
             # Supprime les clés inutiles
             sous_ligne.pop("Rattrapage Re-sit session", None)
             sous_ligne.pop("Coef.", None)
-            sous_ligne.pop("Cours et ï¿½valuations Courses and evaluations", None)
+            sous_ligne.pop("Cours et évaluations Courses and evaluations", None)
             # Renomme les clés importantes
             if "Pondï¿½ration Weight" in sous_ligne:
                 sous_ligne["pondération"] = sous_ligne.pop("Pondï¿½ration Weight")
