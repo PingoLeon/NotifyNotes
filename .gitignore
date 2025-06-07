@@ -52,3 +52,6 @@ Thumbs.db
 
 # Docker build
 docker-compose.debug.yml
+
+.json
+.html

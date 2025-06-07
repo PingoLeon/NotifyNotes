@@ -23,5 +23,5 @@ USER root
 ENTRYPOINT ["/entrypoint.sh"]
 USER appuser
 
-CMD ["python", "src/notes.py"]
+CMD ["python", "src/main.py"]
 LABEL org.opencontainers.image.source="https://github.com/PingoLeon/NotifyNotes"

@@ -57,7 +57,6 @@ NotifyNotes
 Voici un exemple de fichier `docker-compose.yml` :
 
 ```yaml
-# filepath: c:\Users\leon\Downloads\testpy\NotifyNotes\docker-compose.yml
 version: '3.8'
 services:
   notifynotes:
