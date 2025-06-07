@@ -12,61 +12,48 @@ soup = BeautifulSoup(html_content, "lxml", from_encoding="windows-1252")
 header_row = soup.find("thead").find_all("tr")[1]
 headers = [fix_encoding(th.get_text(separator=" ", strip=True).split("\n")[0]) for th in header_row.find_all("th")]
 
-split_data = []
-data = []
-recording = True
+rows = [
+    [fix_encoding(td.get_text(separator=" ", strip=True)) for td in row.find_all("td")]
+    for row in soup.find("tbody").find_all("tr")
+    if "master-1" in row.get("class", [])
+]
 
-for row in soup.find("tbody").find_all("tr"):
-    classes = row.get("class", [])
-    # Si on tombe sur slave master-2, on split et on arrête d'enregistrer
-    if "slave" in classes and "master-2" in classes:
-        if data:
-            split_data.append(data)
-            data = []
-        recording = False
-        continue
-    # Tant qu'on n'a pas rencontré slave master-2, on enregistre tout (y compris slave master-1)
-    if recording:
-        cells = [fix_encoding(td.get_text(separator=" ", strip=True)) for td in row.find_all("td")]
-        if any(cells[1:]):
-            data.append(dict(zip(headers, cells)))
+print(f"Found {len(rows)} rows with {len(headers)} headers.")
+data = [dict(zip(headers, cells)) for cells in rows if any(cells[1:])]
 
-if data:
-    split_data.append(data)
+section_map = {
+    "Projet": "Projet",
+    "Contrôle Continu": "Contrôle Continu",
+    "ContrÃ´le Continu": "Contrôle Continu",
+    "Examen": "Examen"
+}
 
-# Regroupement par matière et sous-sections
 organized = []
 i = 0
-while i < len(split_data[0]):
-    ligne = split_data[0][i]
-    if ligne["Coef."]:
+while i < len(data):
+    ligne = data[i]
+    if ligne.get("Coef."):
         matiere_nom = ligne[headers[0]]
         coef = ligne["Coef."]
         sections = {"Projet": [], "Contrôle Continu": [], "Examen": []}
         i += 1
-        while i < len(split_data[0]) and not split_data[0][i]["Coef."]:
-            sous_ligne = split_data[0][i].copy()
+        while i < len(data) and not data[i].get("Coef."):
+            sous_ligne = data[i].copy()
             titre = sous_ligne[headers[0]].strip()
-            # On trie d'abord
-            if titre == "Projet":
-                cible = sections["Projet"]
-            elif titre == "Contrôle Continu" or titre == "ContrÃ´le Continu":
-                cible = sections["Contrôle Continu"]
-            elif titre == "Examen":
-                cible = sections["Examen"]
-            else:
-                i += 1
-                continue
-            # Supprime les clés inutiles
-            sous_ligne.pop("Rattrapage Re-sit session", None)
-            sous_ligne.pop("Coef.", None)
-            sous_ligne.pop("Cours et évaluations Courses and evaluations", None)
-            # Renomme les clés importantes
-            if "Pondï¿½ration Weight" in sous_ligne:
-                sous_ligne["pondération"] = sous_ligne.pop("Pondï¿½ration Weight")
-            if "Notes Grades" in sous_ligne:
-                sous_ligne["note"] = sous_ligne.pop("Notes Grades")
-            cible.append(sous_ligne)
+            section = section_map.get(titre)
+            if section:
+                # Supprimer la clé inutile
+                sous_ligne.pop("Coef.", None)
+                sous_ligne.pop("Rattrapage Re-sit session", None)
+                sous_ligne.pop("Cours et Ávaluations Courses and evaluations", None)
+                # Renommer la pondération
+                if "Pondï¿½ration Weight" in sous_ligne:
+                    sous_ligne["pondération"] = sous_ligne.pop("Pondï¿½ration Weight")
+                if "PondÁration Weight" in sous_ligne:
+                    sous_ligne["pondération"] = sous_ligne.pop("PondÁration Weight")
+                if "Notes Grades" in sous_ligne:
+                    sous_ligne["note"] = sous_ligne.pop("Notes Grades")
+                sections[section].append(sous_ligne)
             i += 1
         organized.append({
             "matiere": matiere_nom,
@@ -78,5 +65,3 @@ while i < len(split_data[0]):
 
 with open("notes_clean.json", "w", encoding="utf-8") as f:
     json.dump(organized, f, ensure_ascii=False, indent=2)
-
-print(json.dumps(organized, ensure_ascii=False, indent=2))
