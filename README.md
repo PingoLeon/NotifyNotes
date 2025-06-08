@@ -6,11 +6,10 @@
 
 ## 🚀 Fonctionnalités principales
 
-- **Surveillance automatique** de vos notes en ligne (ex : campusonline.inseec.net)
+- **Surveillance automatique** de vos notes en ligne du groupe OMNES
 - **Notifications instantanées** sur votre téléphone ou navigateur via ntfy
 - **Configuration simple** via variables d'environnement ou fichier `.env`
 - **Compatible Docker** pour un déploiement facile partout
-- **Logs détaillés** pour le debug ou le suivi
 
 ---
 
@@ -45,41 +44,21 @@ NotifyNotes
 
 ## ⚡ Installation rapide
 
-### 1. Clonez le dépôt
-
-```bash
-git clone https://github.com/PingoLeon/NotifyNotes
-cd NotifyNotes
-pip install -r requirements.txt
-```
-
-### 2. Configurez les variables d'environnement
-
-- **Méthode recommandée :** renseignez-les directement dans la commande `docker run` ou `docker-compose.yml`
-- **Ou** créez un fichier `.env` à la racine du projet (voir exemple plus bas)
-
-### 3. Construisez l'image Docker
-
-```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/notifynotes:latest .
-```
-
-### 4. Lancez le conteneur
+### 1. Lancez le conteneur
 
 #### Avec Docker Compose (recommandé)
 
 ```yaml
-version: '3.8'
 services:
   notifynotes:
     image: ghcr.io/pingoleon/notifynotes:latest
     container_name: notifynotes
     environment:
-      - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID
+      - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID #REQUIS
       - NTFY_URL=https://ntfy.votre-instance.org/notifs # Facultatif
-      - NTFY_AUTH=true
-      - NTFY_USER=monuser
-      - NTFY_PASS=monmotdepasse
+      - NTFY_AUTH=true # Facultatif
+      - NTFY_USER=monuser # Facultatif
+      - NTFY_PASS=monmotdepasse # Facultatif
     volumes:
       - /config/notifynotes:/config
     restart: unless-stopped
@@ -130,6 +109,43 @@ docker run -d \
 
 ---
 
+---
+
+## 📲 Recevoir les notifications
+
+1. Installez l'application ntfy sur votre smartphone :
+
+   <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">
+     <img src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" alt="Disponible sur Google Play" height="30" style="margin-right:8px;"/>
+   </a>
+   <a href="https://apps.apple.com/us/app/ntfy/id1625396347">
+     <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Télécharger sur l'App Store" height="30"/>
+   </a>
+2. Ajoutez le topic (ex: `notes-xxxxxxx`) affiché dans les logs Docker ou celui que vous avez défini dans `NTFY_URL`.
+3. Recevez vos notifications dès qu'une nouvelle note est détectée ! 🎉
+
+---
+
+## 🛠️ Modifier le projet
+
+### 1. Clonez le dépôt
+
+```bash
+git clone https://github.com/PingoLeon/NotifyNotes
+cd NotifyNotes
+pip install -r requirements.txt
+```
+
+### 2. Configurez les variables d'environnement
+
+- **Méthode recommandée :** créez un fichier `.env` à la racine du projet (voir exemple plus bas)
+
+### 3. Construisez l'image Docker
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/notifynotes:latest .
+```
+
 ## 📝 Exemple de fichier `.env`
 
 ```
@@ -143,28 +159,11 @@ STORAGE_NOTES_JSON_2=new_notes.json
 STORAGE_FILE_URL=ntfy_url.txt
 ```
 
----
 
-## 📲 Recevoir les notifications
-
-1. Installez l'application [ntfy](https://ntfy.sh/app/) sur votre smartphone.
-2. Ajoutez le topic (ex: `notes-xxxxxxx`) affiché dans les logs Docker ou celui que vous avez défini dans `NTFY_URL`.
-3. Recevez vos notifications dès qu'une nouvelle note est détectée ! 🎉
 
 ---
 
-## 🐳 Utilisation sans Docker (avancé)
 
-- Installez Python 3.9+ et les dépendances :
-  ```bash
-  pip install -r requirements.txt
-  ```
-- Lancez le script :
-  ```bash
-  python src/main.py
-  ```
-
----
 
 ## ❓ FAQ
 
