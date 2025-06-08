@@ -13,9 +13,9 @@ if os.path.exists(".env"):
 
 #* Variables d'environnement
 STORAGE_NOTES_JSON = os.getenv("STORAGE_NOTES_JSON", "/config/old_notes.json")
-STORAGE_NOTES_JSON_2 = os.getenv("STORAGE_NOTES_JSON_2", "/config/new_notes.json")  # Nouveau fichier pour les notes
+STORAGE_NOTES_JSON_2 = os.getenv("STORAGE_NOTES_JSON_2", "/config/new_notes.json")
 STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "/config/ntfy_url.txt")
-CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "7200"))
+CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "1800"))
 
 #* Ajout de la gestion du timezone
 TZ = os.getenv("TZ", "Europe/Paris")
@@ -67,5 +67,5 @@ else:
 
 #? Niveau de log
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-if LOG_LEVEL == "DEBUG": # Adapter l'intervalle de vérification en fonction du niveau de log
+if LOG_LEVEL == "DEBUG":
     CHECK_INTERVAL = 30

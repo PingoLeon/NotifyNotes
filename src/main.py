@@ -7,7 +7,7 @@ import datetime
 from zoneinfo import ZoneInfo
 import shutil
 from env import (
-    STORAGE_NOTES_JSON, TZ,URL, NTFY_AUTH, NTFY_URL, auth, LOG_LEVEL, STORAGE_NOTES_JSON_2
+    STORAGE_NOTES_JSON, TZ,URL, NTFY_AUTH, NTFY_URL, auth, LOG_LEVEL, STORAGE_NOTES_JSON_2, CHECK_INTERVAL
 )
 
 def get_paris_time():
@@ -72,7 +72,7 @@ def main():
                 print(f"Hors plage horaire, dodo jusqu'à minuit ({next_midnight.strftime('%Y-%m-%d %H:%M:%S')})")
                 time.sleep(sleep_seconds)
                 continue
-            interval = 1800  # 30 minutes
+            interval = CHECK_INTERVAL
         
         # Récupérer le contenu des notes
         content = get_notes_content()

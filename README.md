@@ -1,60 +1,72 @@
-# NotifyNotes
+# 📢 NotifyNotes
 
-Simple script Python à self-host soi-même via Docker pour vérifier régulièrement si des nouvelles notes sont disponibles. Envoie une notification à une instance ntfy
+**NotifyNotes** est un script Python simple à auto-héberger (notamment via Docker) qui vérifie régulièrement si de nouvelles notes sont disponibles sur votre espace étudiant, puis vous envoie une notification via [ntfy](https://ntfy.sh/).
 
-## Structure du projet
+---
+
+## 🚀 Fonctionnalités principales
+
+- **Surveillance automatique** de vos notes en ligne (ex : campusonline.inseec.net)
+- **Notifications instantanées** sur votre téléphone ou navigateur via ntfy
+- **Configuration simple** via variables d'environnement ou fichier `.env`
+- **Compatible Docker** pour un déploiement facile partout
+- **Logs détaillés** pour le debug ou le suivi
+
+---
+
+## 🗂️ Structure du projet
 
 ```
 NotifyNotes
-├── src
-│   └── notes.py        # Script Python pour surveiller les notes
-├── requirements.txt     # Dépendances nécessaires
-├── Dockerfile           # Instructions pour construire l'image Docker
-└── README.md            # Documentation du projet
+├── src/
+│   ├── main.py              # Script principal
+│   ├── parse.py             # Parsing HTML → JSON
+│   ├── compare_json.py      # Détection des changements
+│   └── env.py               # Gestion des variables d'environnement
+├── requirements.txt         # Dépendances Python
+├── Dockerfile               # Image Docker
+├── entrypoint.sh            # Script d'entrée Docker
+├── .env                     # (optionnel) Variables d'environnement
+└── README.md                # Ce fichier !
 ```
 
-## Prérequis
+---
 
-- Docker installé sur votre host
-- l'app ntfy installée (IOS/Android)
+## 🛠️ Prérequis
 
-## Utilisation
+- **Docker** installé sur votre machine (ou Python 3.9+ si usage sans Docker)
+- **Un accès à votre page de notes** via une URL spécifique (`ex : campusonline.inseec.net/note/note_ajax.php?AccountName=[ID]`)
+  - Comment l'obtenir :
+    - Aller sur `https://VOTREECOLE.campusonline.me/fr-fr/scolarité/`, naviguez dans le relevé de notes, puis allez dans l'onglet `Network` de Devtools (Chrome), la dernière requête est celle qui fetch le fichier de notes avec un id qui vous appartient.
+    - L'URL à obtenir est dans l'onglet `Headers`, à la ligne `request_url` de la requete qui charge vos notes
+- **L'application ntfy** installée sur votre smartphone (Android/iOS) ou accès à une instance ntfy
 
-- Renseigner les variables d'env (voir section après) pour que l'application fonctionne correctement
-- Si pas d'instance NTFY self-hostée, une URL est donnée dans les logs docker et stockée dans un fichier dans /config/ et est à renseigner sur l'app ntfy
+---
 
-## Installation
+## ⚡ Installation rapide
 
-1. Clonez ce dépôt sur votre machine :
+### 1. Clonez le dépôt
 
-   ```
-   git clone https://github.com/PingoLeon/NotifyNotes
+```bash
+git clone https://github.com/PingoLeon/NotifyNotes
+cd NotifyNotes
+pip install -r requirements.txt
+```
 
-   ```
-2. Build l'image Docker :
+### 2. Configurez les variables d'environnement
 
-   ```
-   docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/notifynotes:latest .
-   ```
+- **Méthode recommandée :** renseignez-les directement dans la commande `docker run` ou `docker-compose.yml`
+- **Ou** créez un fichier `.env` à la racine du projet (voir exemple plus bas)
 
-## Variables d'environnement
+### 3. Construisez l'image Docker
 
-| Variable         | Description                                                    | Par défaut / Exemple                                              | Obligatoire |
-| ---------------- | -------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
-| URL              | **REQUIS : URL de la page à surveiller pour les notes** | https://campusonline.inseec.net/note/note_ajax.php?AccountName=... | Oui         |
-| NTFY_URL         | URL du serveur ntfy pour envoyer les notifications             | https://ntfy.xxxxxxx.com/notifs                                    | Non         |
-| NTFY_AUTH        | Active l'authentification ntfy (true/false)                    | false                                                              | Non         |
-| NTFY_USER        | Nom d'utilisateur pour l'authentification ntfy                 | superbanane123                                                     | Non         |
-| NTFY_PASS        | Mot de passe pour l'authentification ntfy                      | supermdp1234indevinable                                            | Non         |
-| CHECK_INTER      | Intervalle de vérification en secondes                        | 3600 (en secondes)                                                 | Non         |
-| STORAGE_NOTES_JSON     | Chemin du fichier de stockage du hash des notes                | /config/last_notes_hash.txt                                        | Non         |
-| STORAGE_FILE_URL | Chemin du fichier de stockage de l'URL ntfy                    | /config/ntfy_url.txt                                               | Non         |
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/notifynotes:latest .
+```
 
-**Si aucune instance self-host n'est disponible, ça ne sert à rien de mettre les variables facultatives**
+### 4. Lancez le conteneur
 
-## Utilisation avec Docker Compose
-
-Voici un exemple de fichier `docker-compose.yml` :
+#### Avec Docker Compose (recommandé)
 
 ```yaml
 version: '3.8'
@@ -63,39 +75,115 @@ services:
     image: ghcr.io/pingoleon/notifynotes:latest
     container_name: notifynotes
     environment:
-      - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=[redacted]
-      - NTFY_URL=[redacted] #Facultatif
-      - NTFY_AUTH=[redacted] 
-      - NTFY_USER=[redacted]
-      - NTFY_PASS=[redacted]
+      - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID
+      - NTFY_URL=https://ntfy.votre-instance.org/notifs # Facultatif
+      - NTFY_AUTH=true
+      - NTFY_USER=monuser
+      - NTFY_PASS=monmotdepasse
     volumes:
       - /config/notifynotes:/config
     restart: unless-stopped
     network_mode: host
 ```
 
-Ou en ligne de commande Docker :
+Lancez avec :
+
+```bash
+docker compose up -d
+```
+
+#### Ou en ligne de commande
 
 ```bash
 docker run -d \
   --name notifynotes \
-  --env URL="https://campusonline.inseec.net/note/note_ajax.php?AccountName=[redacted]" \
-  --env NTFY_URL=[redacted] \
-  --env NTFY_AUTH=[redacted] \
-  --env NTFY_USER=[redacted] \
-  --env NTFY_PASS=[redacted] \
+  --env URL="https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID" \
+  --env NTFY_URL=https://ntfy.votre-instance.org/notifs \
+  --env NTFY_AUTH=true \
+  --env NTFY_USER=monuser \
+  --env NTFY_PASS=monmotdepasse \
   --volume /config/notifynotes:/config \
   --restart unless-stopped \
   --network host \
   ghcr.io/pingoleon/notifynotes:latest
 ```
 
-Vous pouvez aussi lancer le conteneur avec la commande :
+---
 
-```bash
-docker compose up -d
+## ⚙️ Variables d'environnement
+
+| Variable                 | Description                                                   | Exemple / Valeur par défaut                                       | Obligatoire |
+| ------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
+| `URL`                  | **URL de la page de notes à surveiller**               | https://campusonline.inseec.net/note/note_ajax.php?AccountName=... | ✅ Oui      |
+| `NTFY_URL`             | URL de votre serveur ntfy (notifications)                     | https://ntfy.sh/mon-topic                                          | Non         |
+| `NTFY_AUTH`            | Active l'authentification ntfy (`true`/`false`)           | false                                                              | Non         |
+| `NTFY_USER`            | Identifiant ntfy (si auth activée)                           | monuser                                                            | Non         |
+| `NTFY_PASS`            | Mot de passe ntfy (si auth activée)                          | monmotdepasse                                                      | Non         |
+| `CHECK_INTERVAL`       | Intervalle de vérification entre Minuit et 7H (en secondes)  | 1800 (30 minutes)                                                  | Non         |
+| `STORAGE_NOTES_JSON`   | Chemin du fichier de stockage des notes précédentes         | /config/old_notes.json                                             | Non         |
+| `STORAGE_NOTES_JSON_2` | Chemin du fichier temporaire pour les nouvelles notes         | /config/new_notes.json                                             | Non         |
+| `STORAGE_FILE_URL`     | Chemin du fichier où stocker l'URL ntfy générée si besoin | /config/ntfy_url.txt                                               | Non         |
+| `LOG_LEVEL`            | Niveau de log (`INFO` ou `DEBUG`)                         | INFO                                                               | Non         |
+| `TZ`                   | Fuseau horaire                                                | Europe/Paris                                                       | Non         |
+
+> **Astuce :** Si vous ne renseignez pas `NTFY_URL`, une URL ntfy aléatoire sera générée et affichée dans les logs. elle sera en plus enregistrée dans un fichier txt persistant pour ne pas changer d'adresse dans votre app à chaque fois.
+
+---
+
+## 📝 Exemple de fichier `.env`
+
+```
+URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=[VOTRE_ID]
+NTFY_URL=https://ntfy.xxxx.com/sujet
+NTFY_AUTH=true # BESOIN SEULEMENT SI INSTANCE NTFY PRIVEE
+NTFY_USER=[USERNAME]
+NTFY_PASS=[CHOUETTE_MDP]
+STORAGE_NOTES_JSON=old_notes.json
+STORAGE_NOTES_JSON_2=new_notes.json
+STORAGE_FILE_URL=ntfy_url.txt
 ```
 
-## Contribuer
+---
 
-Les contributions sont les bienvenues ! Une pull request ça fait toujours plaisir
+## 📲 Recevoir les notifications
+
+1. Installez l'application [ntfy](https://ntfy.sh/app/) sur votre smartphone.
+2. Ajoutez le topic (ex: `notes-xxxxxxx`) affiché dans les logs Docker ou celui que vous avez défini dans `NTFY_URL`.
+3. Recevez vos notifications dès qu'une nouvelle note est détectée ! 🎉
+
+---
+
+## 🐳 Utilisation sans Docker (avancé)
+
+- Installez Python 3.9+ et les dépendances :
+  ```bash
+  pip install -r requirements.txt
+  ```
+- Lancez le script :
+  ```bash
+  python src/main.py
+  ```
+
+---
+
+## ❓ FAQ
+
+- **Q : Est-ce que je peux utiliser ce script sans ntfy ?**
+
+  - Non, ntfy, via l'app officielle disponible sur IOS et Android est nécessaire pour recevoir les notifications.
+- **Q : Est-ce que mes identifiants sont stockés ?**
+
+  - Non, seules les notes sont stockées localement pour comparaison.
+
+---
+
+## 🤝 Contribuer
+
+Les contributions sont **bienvenues** !
+N'hésitez pas à ouvrir une *issue* ou une *pull request* pour toute suggestion, bug ou amélioration.
+
+---
+
+## 📝 Licence
+
+Ce projet est sous licence Unlicense, parce que le partage c'est cool
