@@ -20,9 +20,8 @@ COPY . .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER root
-ENTRYPOINT ["/entrypoint.sh"]
-USER appuser
+RUN apk add --no-cache su-exec
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "src/main.py"]
 LABEL org.opencontainers.image.source="https://github.com/PingoLeon/NotifyNotes"

@@ -1,5 +1,8 @@
 #!/bin/sh
-if [ "$(stat -c %u /config)" != "1000" ]; then
-  chown -R appuser /config
-fi
-exec "$@"
+# filepath: entrypoint.sh
+
+# Changer le propriétaire du dossier monté
+chown -R 1000:1000 /config
+
+# Exécuter l’application avec l’utilisateur non-root
+exec su-exec 1000:1000 "$@"
