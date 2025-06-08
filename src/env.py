@@ -12,7 +12,8 @@ if os.path.exists(".env"):
         print("Le module python-dotenv n'est pas installé, mais .env détecté.")
 
 #* Variables d'environnement
-STORAGE_FILE = os.getenv("STORAGE_FILE", "/config/last_notes_hash.txt")
+STORAGE_NOTES_JSON = os.getenv("STORAGE_NOTES_JSON", "/config/old_notes.json")
+STORAGE_NOTES_JSON_2 = os.getenv("STORAGE_NOTES_JSON_2", "/config/new_notes.json")  # Nouveau fichier pour les notes
 STORAGE_FILE_URL = os.getenv("STORAGE_FILE_URL", "/config/ntfy_url.txt")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "7200"))
 
@@ -45,13 +46,13 @@ if NTFY_AUTH:
 #? Endpoint de notification NTFY
 NTFY_URL = os.getenv("NTFY_URL") 
 if NTFY_URL:
-    print("URL ntfy custom utilisée :", NTFY_URL)
+    print("URL ntfy custom utilisée :", NTFY_URL,"\n")
 else:
     # Si pas de variable d'env, on regarde dans le fichier STORAGE_FILE_URL
     if os.path.exists(STORAGE_FILE_URL):
         with open(STORAGE_FILE_URL, "r") as f:
             NTFY_URL = f.read().strip()
-        print("URL ntfy récupérée depuis le fichier :", NTFY_URL)
+        print("URL ntfy récupérée depuis le fichier :", NTFY_URL,"\n")
         NTFY_AUTH = False
         auth = None
     else:
@@ -60,7 +61,7 @@ else:
         NTFY_URL = f"https://ntfy.sh/notes-{random_suffix}"
         with open(STORAGE_FILE_URL, "w") as f:
             f.write(NTFY_URL)
-        print("URL ntfy par défaut générée :", NTFY_URL)
+        print("URL ntfy par défaut générée :", NTFY_URL,"\n")
         NTFY_AUTH = False
         auth = None
 

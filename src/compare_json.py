@@ -1,5 +1,3 @@
-
-
 import json
 from parse import convert_notes_to_json
 import os
@@ -40,14 +38,3 @@ def find_new_notes(old_notes, new_notes):
                         changes.append([matiere_tronquee, section, note, ponderation])
                         print(f"Changement détecté : {matiere_tronquee}, catégorie={section}, note={note}, pondération={ponderation}")
     return changes
-
-if __name__ == "__main__":
-    old_notes = load_notes_json("notes_clean.json")
-    new_notes = load_notes_json("notes_clean_tmp.json")
-    changes = find_new_notes(old_notes, new_notes)
-    if changes:
-        print("Liste des changements (matière, note, pondération) :")
-        for change in changes:
-            print(change)
-    else:
-        print("Aucun changement détecté.")

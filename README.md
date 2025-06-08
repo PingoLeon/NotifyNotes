@@ -47,7 +47,7 @@ NotifyNotes
 | NTFY_USER        | Nom d'utilisateur pour l'authentification ntfy                 | superbanane123                                                     | Non         |
 | NTFY_PASS        | Mot de passe pour l'authentification ntfy                      | supermdp1234indevinable                                            | Non         |
 | CHECK_INTER      | Intervalle de vérification en secondes                        | 3600 (en secondes)                                                 | Non         |
-| STORAGE_FILE     | Chemin du fichier de stockage du hash des notes                | /config/last_notes_hash.txt                                        | Non         |
+| STORAGE_NOTES_JSON     | Chemin du fichier de stockage du hash des notes                | /config/last_notes_hash.txt                                        | Non         |
 | STORAGE_FILE_URL | Chemin du fichier de stockage de l'URL ntfy                    | /config/ntfy_url.txt                                               | Non         |
 
 **Si aucune instance self-host n'est disponible, ça ne sert à rien de mettre les variables facultatives**

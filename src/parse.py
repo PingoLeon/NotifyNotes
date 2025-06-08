@@ -33,7 +33,7 @@ def split_notes(note_str):
                 })
     return notes
 
-def convert_notes_to_json(url_response, json_file="new_notes.json"):
+def convert_notes_to_json(url_response, json_file):
     html_content = url_response
     if not html_content:
         raise ValueError("Le contenu HTML est vide ou invalide.")
