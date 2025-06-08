@@ -127,8 +127,8 @@ docker run -d \
 
 1. Installez l'application ntfy sur votre smartphone :
 
-   /p
-l---ip install -r requirements.txt
+```bash
+pip install -r requirements.txt
 ```
 
 ### 2. Configurez les variables d'environnement
