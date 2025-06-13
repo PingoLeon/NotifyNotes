@@ -42,20 +42,28 @@ def send_notification(change):
                 if response.status_code == 200:
                     print("Notification envoyée avec succès via https")
                 else:
-                    print(f"Erreur lors de l'envoi de la notification via https\nDEBUG : {e}")
+                    print(f"Erreur lors de l'envoi de la notification via https")
+                    print()
+                    print("DEBUG : {e}")
                     if NTFY_URL_LOCAL_FALLBACK:
                         print("Envoi de la notification via l'URL de fallback local (HTTP)")
                         try :
                             requests.post(NTFY_URL_LOCAL_FALLBACK, data=":(", headers={ "Title": "Aucun changement" }, auth=auth, timeout=10)
                         except Exception as e:
-                            print(f"Erreur lors de l'envoi de la notification\nDEBUG : {e}")
+                            print(f"Erreur lors de l'envoi de la notification")
+                            print()
+                            print("DEBUG : {e}")
                         if response.status_code == 200:
                             print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
                         else:
-                            print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)\nDEBUG : {e}")
-                        print("\n")
+                            print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
+                            print()
+                            print("DEBUG : {e}")
+                        print()
             except Exception as e:
-                print(f"Erreur lors de l'envoi de la notification\nDEBUG : {e}")
+                print(f"Erreur lors de l'envoi de la notification")
+                print()
+                print("DEBUG : {e}")
             
         return
 
@@ -106,7 +114,9 @@ def send_notification(change):
                 else:
                     print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
             except Exception as e:
-                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)\nDEBUG : {e}")
+                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
+                print()
+                print("DEBUG : {e}")
 
 def main():
     while True:
@@ -161,7 +171,8 @@ def main():
             shutil.move(STORAGE_NOTES_JSON_2, STORAGE_NOTES_JSON)
 
         next_time = get_paris_time() + datetime.timedelta(seconds=interval)
-        print("Prochain check à", next_time.strftime("%Y-%m-%d %H:%M:%S"),"\n")
+        print("Prochain check à", next_time.strftime("%Y-%m-%d %H:%M:%S"))
+        print()
         time.sleep(interval)
 
 if __name__ == "__main__":
