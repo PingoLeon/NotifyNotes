@@ -161,7 +161,10 @@ def main():
             if changes:
                 print("#####❗Changement détecté dans les notes❗####")
                 for change in changes:
-                    send_notification(change)
+                    try:
+                        send_notification(change)
+                    except Exception as e:
+                        print(f"Erreur grave lors de l'envoi de la notification : {e}")
             else:
                 print("🫠  Aucun changement détecté.")
                 if LOG_LEVEL == "DEBUG":
