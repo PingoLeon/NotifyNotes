@@ -47,6 +47,7 @@ if NTFY_AUTH:
 NTFY_URL = os.getenv("NTFY_URL") 
 if NTFY_URL:
     print("URL ntfy custom utilisée :", NTFY_URL,"\n")
+    NTFY_URL_LOCAL_FALLBACK = os.getenv("NTFY_URL_LOCAL_FALLBACK", None)
 else:
     # Si pas de variable d'env, on regarde dans le fichier STORAGE_FILE_URL
     if os.path.exists(STORAGE_FILE_URL):

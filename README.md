@@ -56,6 +56,7 @@ services:
     environment:
       - URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID #REQUIS
       - NTFY_URL=https://ntfy.votre-instance.org/notifs # Facultatif
+      - NTFY_URL_LOCAL_FALLBACK=http://iplocalentfy:portntfy/notifs #Facultatif
       - NTFY_AUTH=true # Facultatif
       - NTFY_USER=monuser # Facultatif
       - NTFY_PASS=monmotdepasse # Facultatif
@@ -78,6 +79,7 @@ docker run -d \
   --name notifynotes \
   --env URL="https://campusonline.inseec.net/note/note_ajax.php?AccountName=VOTRE_ID" \
   --env NTFY_URL=https://ntfy.votre-instance.org/notifs \
+  --env NTFY_URL_LOCAL_FALLBACK=http://iplocalentfy:portntfy/notifs \
   --env NTFY_AUTH=true \
   --env NTFY_USER=monuser \
   --env NTFY_PASS=monmotdepasse \
@@ -86,8 +88,10 @@ docker run -d \
   --network host \
   ghcr.io/pingoleon/notifynotes:latest
 ```
+
 ---
- ## 📲 Recevoir les notifications
+
+## 📲 Recevoir les notifications
 
 1. Installez l'application ntfy sur votre smartphone :
 
@@ -99,41 +103,31 @@ docker run -d \
    </a>
 2. Ajoutez le topic (ex: `notes-xxxxxxx`) affiché dans les logs Docker ou celui que vous avez défini dans `NTFY_URL`.
 3. Recevez vos notifications dès qu'une nouvelle note est détectée ! 🎉
----    
+
+---
 
 ## ⚙️ Variables d'environnement
 
-| Variable                 | Description              | Exemple / Valeur par défaut                                       | Obligatoire |
-| ------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
-| `URL`                  | **URL de la page de notes à surveiller**               | https://campusonline.inseec.net/note/note_ajax.php?AccountName=... | ✅ Oui      |
-| `NTFY_URL`             | URL de votre serveur ntfy (notifications)                     | https://ntfy.sh/mon-topic                                          | Non         |
-| `NTFY_AUTH`            | Active l'authentification ntfy (`true`/`false`)           | false                                                              | Non         |
-| `NTFY_USER`            | Identifiant ntfy (si auth activée)                           | monuser                                                            | Non         |
-| `NTFY_PASS`            | Mot de passe ntfy (si auth activée)                          | monmotdepasse                                                      | Non         |
-| `CHECK_INTERVAL`       | Intervalle de vérification entre Minuit et 7H (en secondes)  | 1800 (30 minutes)                                                  | Non         |
-| `STORAGE_NOTES_JSON`   | Chemin du fichier de stockage des notes précédentes         | /config/old_notes.json                                             | Non         |
-| `STORAGE_NOTES_JSON_2` | Chemin du fichier temporaire pour les nouvelles notes         | /config/new_notes.json                                             | Non         |
-| `STORAGE_FILE_URL`     | Chemin du fichier où stocker l'URL ntfy générée si besoin | /config/ntfy_url.txt                                               | Non         |
-| `LOG_LEVEL`            | Niveau de log (`INFO` ou `DEBUG`)                         | INFO                                                               | Non         |
-| `TZ`                   | Fuseau horaire                                                | Europe/Paris                                                       | Non         |
+| Variable                    | Description                                                                                                                      | Exemple / Valeur par défaut                                       | Obligatoire |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
+| `URL`                     | **URL de la page de notes à surveiller**                                                                                  | https://campusonline.inseec.net/note/note_ajax.php?AccountName=... | ✅ Oui      |
+| `NTFY_URL`                | URL de votre serveur ntfy (notifications)                                                                                        | https://ntfy.sh/mon-topic                                          | Non         |
+| `NTFY_AUTH`               | Active l'authentification ntfy (`true`/`false`)                                                                              | false                                                              | Non         |
+| `NTFY_USER`               | Identifiant ntfy (si auth activée)                                                                                              | monuser                                                            | Non         |
+| `NTFY_PASS`               | Mot de passe ntfy (si auth activée)                                                                                             | monmotdepasse                                                      | Non         |
+| `CHECK_INTERVAL`          | Intervalle de vérification entre Minuit et 7H (en secondes)                                                                     | 1800 (30 minutes)                                                  | Non         |
+| `STORAGE_NOTES_JSON`      | Chemin du fichier de stockage des notes précédentes                                                                            | /config/old_notes.json                                             | Non         |
+| `STORAGE_NOTES_JSON_2`    | Chemin du fichier temporaire pour les nouvelles notes                                                                            | /config/new_notes.json                                             | Non         |
+| `STORAGE_FILE_URL`        | Chemin du fichier où stocker l'URL ntfy générée si besoin                                                                    | /config/ntfy_url.txt                                               | Non         |
+| `LOG_LEVEL`               | Niveau de log (`INFO` ou `DEBUG`)                                                                                            | INFO                                                               | Non         |
+| `TZ`                      | Fuseau horaire                                                                                                                   | Europe/Paris                                                       | Non         |
+| `NTFY_URL_LOCAL_FALLBACK` | Url de fallback (utile si la première est en https et peut fail par moment), si l'instance ntfy custom est sur le même réseau | http://192.168.0.1:3456/notifs                                     | Non         |
 
 > **Astuce :** Si vous ne renseignez pas `NTFY_URL`, une URL ntfy aléatoire sera générée et affichée dans les logs. elle sera en plus enregistrée dans un fichier txt persistant pour ne pas changer d'adresse dans votre app à chaque fois.
->
-> ---
->
->
 
-## 📲 Recevoir les notifications
+### 2. Hors Docker : Configurez les variables d'environnement
 
-1. Installez l'application ntfy sur votre smartphone :
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Configurez les variables d'environnement
-
-- **Méthode recommandée :** créez un fichier `.env` à la racine du projet (voir exemple plus bas)
+- **Méthode recommandée :** cloner et créer un fichier `.env` à la racine du projet (voir exemple plus bas)
 
 ### 3. Construisez l'image Docker
 
@@ -145,7 +139,8 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/pingoleon/noti
 
 ```
 URL=https://campusonline.inseec.net/note/note_ajax.php?AccountName=[VOTRE_ID]
-NTFY_URL=https://ntfy.xxxx.com/sujet
+NTFY_URL=https://ntfy.xxxx.com/notifs
+NTFY_URL_LOCAL_FALLBACK=http://[ip_fallback_sur_réseau_local]/notifs
 NTFY_AUTH=true # BESOIN SEULEMENT SI INSTANCE NTFY PRIVEE
 NTFY_USER=[USERNAME]
 NTFY_PASS=[CHOUETTE_MDP]

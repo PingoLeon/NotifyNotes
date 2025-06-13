@@ -7,7 +7,7 @@ import datetime
 from zoneinfo import ZoneInfo
 import shutil
 from env import (
-    STORAGE_NOTES_JSON, TZ,URL, NTFY_AUTH, NTFY_URL, auth, LOG_LEVEL, STORAGE_NOTES_JSON_2, CHECK_INTERVAL
+    STORAGE_NOTES_JSON, TZ,URL, NTFY_AUTH, NTFY_URL, auth, LOG_LEVEL, STORAGE_NOTES_JSON_2, CHECK_INTERVAL, NTFY_URL_LOCAL_FALLBACK
 )
 
 def get_paris_time():
@@ -32,31 +32,81 @@ def get_notes_content():
     response.raise_for_status()
     return response.text
 
-#! Envoi de notification via NTFY (Amélioration possible)
+#! Envoi de notification via NTFY
 def send_notification(change):
     if change == []:
         if LOG_LEVEL == "DEBUG":
-            response = requests.post(NTFY_URL, data=":(", headers={ "Title": "Aucun changement" }, auth=auth)
+            try:
+                print("Mode debug, envoi d'une notification")
+                response = requests.post(NTFY_URL, data=":(", headers={ "Title": "Aucun changement" }, auth=auth, timeout=10)
+                if response.status_code == 200:
+                    print("Notification envoyée avec succès via https")
+                else:
+                    print(f"Erreur lors de l'envoi de la notification via https\nDEBUG : {e}")
+                    if NTFY_URL_LOCAL_FALLBACK:
+                        print("Envoi de la notification via l'URL de fallback local (HTTP)")
+                        try :
+                            requests.post(NTFY_URL_LOCAL_FALLBACK, data=":(", headers={ "Title": "Aucun changement" }, auth=auth, timeout=10)
+                        except Exception as e:
+                            print(f"Erreur lors de l'envoi de la notification\nDEBUG : {e}")
+                        if response.status_code == 200:
+                            print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
+                        else:
+                            print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)\nDEBUG : {e}")
+                        print("\n")
+            except Exception as e:
+                print(f"Erreur lors de l'envoi de la notification\nDEBUG : {e}")
+            
         return
-    
+
     matiere, section, note, ponderation = change
     title = parse.strip_accents(f"{matiere} - {section}")
     text = f"➡️ Note: {note} - Pondération: {ponderation}"
+    print(f"Note : {title} - {text}")
+
     if NTFY_AUTH:
         response = requests.post(
-            NTFY_URL, 
+            NTFY_URL,
             data=text,
-            headers={ "Title": title,
-                      "Tags" : "new"},
-            auth=auth)
+            headers={ "Title": title, "Tags": "new" },
+            auth=auth,
+            timeout=10
+        )
     else:
         response = requests.post(
-            NTFY_URL, 
+            NTFY_URL,
             data=text,
-            headers={ "Title": title,
-                    "Tags" : "new"})
-    if response.status_code != 200:
-        print(f"Erreur lors de l'envoi de la notification: {response.status_code} - {response.text}")
+            headers={ "Title": title, "Tags": "new" },
+            timeout=10
+        )
+    if response.status_code == 200:
+        print(f"Notification envoyée avec succès (HTTPS)")
+    else:
+        print(f"Erreur lors de l'envoi de la notification  {response.status_code} - {response.text}")
+        if NTFY_URL_LOCAL_FALLBACK:
+            print("Envoi de la notification via l'URL de fallback local (HTTP)")
+            try:
+                if NTFY_AUTH:
+                    response = requests.post(
+                        NTFY_URL_LOCAL_FALLBACK,
+                        data=text,
+                        headers={ "Title": title, "Tags": "new" },
+                        auth=auth,
+                        timeout=10
+                    )
+                else:
+                    response = requests.post(
+                        NTFY_URL_LOCAL_FALLBACK,
+                        data=text,
+                        headers={ "Title": title, "Tags": "new" },
+                        timeout=10
+                    )
+                if response.status_code == 200:
+                    print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
+                else:
+                    print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
+            except Exception as e:
+                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)\nDEBUG : {e}")
 
 def main():
     while True:
@@ -99,11 +149,11 @@ def main():
             # Comparer
             changes = comparator.find_new_notes(old_notes, new_notes)
             if changes:
-                print("#####❗Changement détecté dans les notes❗####\n")
+                print("#####❗Changement détecté dans les notes❗####")
                 for change in changes:
                     send_notification(change)
             else:
-                print("🫠  Aucun changement détecté.\n")
+                print("🫠  Aucun changement détecté.")
                 if LOG_LEVEL == "DEBUG":
                     send_notification([])
             if os.path.exists(STORAGE_NOTES_JSON):
@@ -111,7 +161,7 @@ def main():
             shutil.move(STORAGE_NOTES_JSON_2, STORAGE_NOTES_JSON)
 
         next_time = get_paris_time() + datetime.timedelta(seconds=interval)
-        print("Prochain check à", next_time.strftime("%Y-%m-%d %H:%M:%S"))
+        print("Prochain check à", next_time.strftime("%Y-%m-%d %H:%M:%S"),"\n")
         time.sleep(interval)
 
 if __name__ == "__main__":

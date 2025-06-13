@@ -36,5 +36,4 @@ def find_new_notes(old_notes, new_notes):
                         note = new_note.get("note", "")
                         ponderation = new_note.get("pondération", "")
                         changes.append([matiere_tronquee, section, note, ponderation])
-                        print(f"Changement détecté : {matiere_tronquee}, catégorie={section}, note={note}, pondération={ponderation}")
     return changes
