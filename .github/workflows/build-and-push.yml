@@ -37,3 +37,5 @@ jobs:
             ghcr.io/pingoleon/notifynotes:latest
             ghcr.io/pingoleon/notifynotes:amd64
             ghcr.io/pingoleon/notifynotes:arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
