@@ -10,7 +10,7 @@ from env import (
     STORAGE_NOTES_JSON, TZ,URL, NTFY_AUTH, NTFY_URL, auth, LOG_LEVEL, STORAGE_NOTES_JSON_2, CHECK_INTERVAL, NTFY_URL_LOCAL_FALLBACK
 )
 
-def get_paris_time():
+def get_tz_time():
     try:
         return datetime.datetime.now(ZoneInfo(TZ))
     except Exception:
@@ -133,10 +133,12 @@ def main():
                 time.sleep(sleep_seconds)
                 continue
             interval = CHECK_INTERVAL
+            if 1 <= get_tz_time().hour < 1.5: # Si on est entre 1h et 1h30, on attend 2 minutes
+                interval = 120
         
         # Récupérer le contenu des notes
         content = get_notes_content()
-        current_time = get_paris_time().strftime("%Y-%m-%d %H:%M:%S")
+        current_time = get_tz_time().strftime("%Y-%m-%d %H:%M:%S")
         print(f"Vérification des notes à {current_time}...")
 
         # Charger l'ancien JSON
@@ -173,7 +175,7 @@ def main():
                 os.remove(STORAGE_NOTES_JSON)
             shutil.move(STORAGE_NOTES_JSON_2, STORAGE_NOTES_JSON)
 
-        next_time = get_paris_time() + datetime.timedelta(seconds=interval)
+        next_time = get_tz_time() + datetime.timedelta(seconds=interval)
         print("Prochain check à", next_time.strftime("%Y-%m-%d %H:%M:%S"))
         print()
         time.sleep(interval)
