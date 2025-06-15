@@ -71,52 +71,53 @@ def send_notification(change):
     title = parse.strip_accents(f"{matiere} - {section}")
     text = f"➡️ Note: {note} - Pondération: {ponderation}"
     print(f"Note : {title} - {text}")
-
-    if NTFY_AUTH:
-        response = requests.post(
-            NTFY_URL,
-            data=text,
-            headers={ "Title": title, "Tags": "new" },
-            auth=auth,
-            timeout=10
-        )
-    else:
-        response = requests.post(
-            NTFY_URL,
-            data=text,
-            headers={ "Title": title, "Tags": "new" },
-            timeout=10
-        )
-    if response.status_code == 200:
-        print(f"Notification envoyée avec succès (HTTPS)")
-    else:
-        print(f"Erreur lors de l'envoi de la notification  {response.status_code} - {response.text}")
-        if NTFY_URL_LOCAL_FALLBACK:
-            print("Envoi de la notification via l'URL de fallback local (HTTP)")
-            try:
-                if NTFY_AUTH:
-                    response = requests.post(
-                        NTFY_URL_LOCAL_FALLBACK,
-                        data=text,
-                        headers={ "Title": title, "Tags": "new" },
-                        auth=auth,
-                        timeout=10
-                    )
-                else:
-                    response = requests.post(
-                        NTFY_URL_LOCAL_FALLBACK,
-                        data=text,
-                        headers={ "Title": title, "Tags": "new" },
-                        timeout=10
-                    )
-                if response.status_code == 200:
-                    print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
-                else:
-                    print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
-            except Exception as e:
-                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
-                print()
-                print("DEBUG : {e}")
+    try:
+        if NTFY_AUTH:
+            response = requests.post(
+                NTFY_URL,
+                data=text,
+                headers={ "Title": title, "Tags": "new" },
+                auth=auth,
+                timeout=10
+            )
+        else:
+            response = requests.post(
+                NTFY_URL,
+                data=text,
+                headers={ "Title": title, "Tags": "new" },
+                timeout=10
+            )
+        if response.status_code == 200:
+            print(f"Notification envoyée avec succès (HTTPS)")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de la notification : {e}") 
+    print(f"Erreur lors de l'envoi de la notification  {response.status_code} - {response.text}")
+    if NTFY_URL_LOCAL_FALLBACK:
+        print("Envoi de la notification via l'URL de fallback local (HTTP)")
+        try:
+            if NTFY_AUTH:
+                response = requests.post(
+                    NTFY_URL_LOCAL_FALLBACK,
+                    data=text,
+                    headers={ "Title": title, "Tags": "new" },
+                    auth=auth,
+                    timeout=10
+                )
+            else:
+                response = requests.post(
+                    NTFY_URL_LOCAL_FALLBACK,
+                    data=text,
+                    headers={ "Title": title, "Tags": "new" },
+                    timeout=10
+                )
+            if response.status_code == 200:
+                print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
+            else:
+                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
+        except Exception as e:
+            print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
+            print()
+            print("DEBUG : {e}")
 
 def main():
     while True:
@@ -163,10 +164,7 @@ def main():
             if changes:
                 print("#####❗Changement détecté dans les notes❗####")
                 for change in changes:
-                    try:
-                        send_notification(change)
-                    except Exception as e:
-                        print(f"Erreur grave lors de l'envoi de la notification : {e}")
+                    send_notification(change)
             else:
                 print("🫠  Aucun changement détecté.")
                 if LOG_LEVEL == "DEBUG":
