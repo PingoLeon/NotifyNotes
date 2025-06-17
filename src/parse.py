@@ -44,16 +44,14 @@ def convert_notes_to_json(url_response, json_file):
     
     
     thead = soup.find("thead")
-    #test
-    thead = None
     if thead is None:
-        print("Avertissement : balise <thead> non trouvée dans le HTML, attente 2 minutes avant relance...")
+        print("Avertissement : balise <thead> non trouvée dans la réponse, le serveur est probablement en train de se reload, attente 1 minutes avant relance...")
         with open("debug_last_notes.html", "w", encoding="utf-8") as f:
             f.write(html_content)
-        time.sleep(120)  # Pause 2 minutes
+        time.sleep(60)
         print("Redémarrage du script...")
         sys.exit(1)
-    header_row = soup.find("thead").find_all("tr")[1]
+    header_row = thead.find_all("tr")[1]
     headers = [fix_encoding_accents(th.get_text(separator=" ", strip=True).split("\n")[0]) for th in header_row.find_all("th")]
 
     rows = [
