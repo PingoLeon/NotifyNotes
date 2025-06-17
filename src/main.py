@@ -87,37 +87,39 @@ def send_notification(change):
                 headers={ "Title": title, "Tags": "new" },
                 timeout=10
             )
-        if response.status_code == 200:
-            print(f"Notification envoyée avec succès (HTTPS)")
     except Exception as e:
         print(f"Erreur lors de l'envoi de la notification : {e}") 
-    print(f"Erreur lors de l'envoi de la notification  {response.status_code} - {response.text}")
-    if NTFY_URL_LOCAL_FALLBACK:
-        print("Envoi de la notification via l'URL de fallback local (HTTP)")
-        try:
-            if NTFY_AUTH:
-                response = requests.post(
-                    NTFY_URL_LOCAL_FALLBACK,
-                    data=text,
-                    headers={ "Title": title, "Tags": "new" },
-                    auth=auth,
-                    timeout=10
-                )
-            else:
-                response = requests.post(
-                    NTFY_URL_LOCAL_FALLBACK,
-                    data=text,
-                    headers={ "Title": title, "Tags": "new" },
-                    timeout=10
-                )
-            if response.status_code == 200:
-                print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
-            else:
-                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
-        except Exception as e:
-            print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
-            print()
-            print("DEBUG : {e}")
+    
+    if response.status_code == 200:
+            print(f"Notification envoyée avec succès (HTTPS)")
+    else:
+        print(f"Erreur lors de l'envoi de la notification  {response.status_code} - {response.text}")
+        if NTFY_URL_LOCAL_FALLBACK:
+            print("Envoi de la notification via l'URL de fallback local (HTTP)")
+            try:
+                if NTFY_AUTH:
+                    response = requests.post(
+                        NTFY_URL_LOCAL_FALLBACK,
+                        data=text,
+                        headers={ "Title": title, "Tags": "new" },
+                        auth=auth,
+                        timeout=10
+                    )
+                else:
+                    response = requests.post(
+                        NTFY_URL_LOCAL_FALLBACK,
+                        data=text,
+                        headers={ "Title": title, "Tags": "new" },
+                        timeout=10
+                    )
+                if response.status_code == 200:
+                    print("Notification envoyée avec succès via l'URL de fallback local (HTTP)")
+                else:
+                    print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP) {response.status_code} - {response.text}")
+            except Exception as e:
+                print(f"Erreur lors de l'envoi de la notification via l'URL de fallback local (HTTP)")
+                print()
+                print("DEBUG : {e}")
 
 def main():
     while True:

@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import re
 import json
 import unicodedata
+import time
+import os
 
 def fix_encoding_accents(s):
     return s.replace('�', 'é').replace('Ã©', 'é').replace('Ã¨', 'è').replace('ï¿½', 'Á')
@@ -39,7 +41,18 @@ def convert_notes_to_json(url_response, json_file):
         raise ValueError("Le contenu HTML est vide ou invalide.")
 
     soup = BeautifulSoup(html_content, "lxml")
-
+    
+    
+    thead = soup.find("thead")
+    #test
+    thead = None
+    if thead is None:
+        print("Avertissement : balise <thead> non trouvée dans le HTML, attente 2 minutes avant relance...")
+        with open("debug_last_notes.html", "w", encoding="utf-8") as f:
+            f.write(html_content)
+        time.sleep(120)  # Pause 2 minutes
+        print("Redémarrage du script...")
+        os.exit(1)
     header_row = soup.find("thead").find_all("tr")[1]
     headers = [fix_encoding_accents(th.get_text(separator=" ", strip=True).split("\n")[0]) for th in header_row.find_all("th")]
 
