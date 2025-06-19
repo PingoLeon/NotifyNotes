@@ -69,7 +69,10 @@ def send_notification(change):
 
     matiere, section, note, ponderation = change
     title = parse.strip_accents(f"{matiere} - {section}")
-    text = f"➡️ Note: {note} - Pondération: {ponderation}"
+    if ponderation:
+        text = f"➡️ Note: {note} - Pondération: {ponderation}"
+    else:
+        text = f"➡️ Note: {note}"
     print(f"Note : {title} - {text}")
     try:
         if NTFY_AUTH:
