@@ -73,6 +73,8 @@ def send_notification(change):
         text = f"➡️ Note: {note} - Pondération: {ponderation}"
     else:
         text = f"➡️ Note: {note}"
+    if not note:
+        text = "🛠️ Modification de la pondération"
     print(f"Note : {title} - {text}")
     try:
         if NTFY_AUTH:
@@ -132,14 +134,16 @@ def main():
             interval = 30
         else:
             # Si on est hors de la plage minuit-7h, on attend jusqu'à minuit
-            if not (0 <= now.hour < 7):
+            if not (0 <= now.hour < 3):
                 next_midnight = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
                 sleep_seconds = (next_midnight - now).total_seconds()
                 print(f"Hors plage horaire, dodo jusqu'à minuit ({next_midnight.strftime('%Y-%m-%d %H:%M:%S')})")
                 time.sleep(sleep_seconds)
                 continue
             interval = CHECK_INTERVAL
-            if 1 <= get_tz_time().hour < 1.5: # Si on est entre 1h et 1h30, on attend 2 minutes
+            # Si on est entre 1h20 et 1h40, on attend 2 minutes
+            now_tz = get_tz_time()
+            if now_tz.hour == 1 and 20 <= now_tz.minute < 40:
                 interval = 120
         
         # Récupérer le contenu des notes
